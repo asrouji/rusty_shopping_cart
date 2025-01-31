@@ -9,6 +9,38 @@ fn test_new_cart() {
 }
 
 #[test]
+fn test_id_immutable() {
+    let cart = ShoppingCart::new("abc12345de-A").unwrap();
+    let original_id = cart.id();
+    // uuid implements the Copy trait, modifying this should not affect the original id
+    let mut _id = cart.id();
+    _id = uuid::Uuid::new_v4();
+    // Ensure that the original id in the cart is not modified
+    assert_eq!(cart.id(), original_id);
+}
+
+#[test]
+fn test_customer_id_immutable() {
+    let cart = ShoppingCart::new("abc12345de-A").unwrap();
+    // &str is immutable, so we can't even modify it without calling to_string()
+    let mut customer_id = cart.customer_id().to_string();
+    customer_id.push_str("garbage");
+    // ensure that the original customer_id in the cart is not modified
+    assert_eq!(cart.customer_id(), "abc12345de-A");
+}
+
+#[test]
+fn test_items_immutable() {
+    let cart = ShoppingCart::new("abc12345de-A").unwrap();
+    let items = cart.items();
+    // without the clone line below, Rust will not allow us to modify the items!
+    let mut items = items.clone();
+    // because this is a clone, modifying it will not affect the original cart
+    items.insert("Laptop".to_string(), 1);
+    assert_eq!(cart.items().len(), 0);
+}
+
+#[test]
 fn test_invalid_customer_id() {
     let result = ShoppingCart::new("abc12345de");
     assert!(result.is_err());
