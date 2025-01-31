@@ -1,6 +1,11 @@
 use regex::Regex;
 use std::collections::HashMap;
 
+const MIN_ITEM_NAME_LENGTH: usize = 3;
+const MAX_ITEM_NAME_LENGTH: usize = 20;
+const MIN_ITEM_PRICE: f64 = 1.0;
+const MAX_ITEM_PRICE: f64 = 10000.0;
+
 /// A catalog of items with their prices.
 #[derive(Debug)]
 pub struct Catalog {
@@ -46,12 +51,16 @@ impl Catalog {
     /// * `Err(String)` if the item name or price is invalid.
     fn add_item(&mut self, item_name: &str, price: f64) -> Result<(), String> {
         if !Self::is_valid_item_name(item_name) {
-            return Err(
-                "Invalid item name: must be 3-20 characters long and contain only letters".into(),
-            );
+            return Err(format!(
+                "Invalid item name: must be {}-{} characters long and contain only letters",
+                MIN_ITEM_NAME_LENGTH, MAX_ITEM_NAME_LENGTH
+            ));
         }
         if !Self::is_valid_item_price(price) {
-            return Err("Invalid price: must be more than $1 and less than $10,000".into());
+            return Err(format!(
+                "Invalid price: must be more than ${} and less than ${}",
+                MIN_ITEM_PRICE, MAX_ITEM_PRICE
+            ));
         }
         self.items.insert(item_name.to_string(), price);
         Ok(())
@@ -67,7 +76,7 @@ impl Catalog {
     ///
     /// `true` if the price is between $1 and $10,000, otherwise `false`.
     fn is_valid_item_price(price: f64) -> bool {
-        (1.0..10000.0).contains(&price)
+        (MIN_ITEM_PRICE..MAX_ITEM_PRICE).contains(&price)
     }
 
     /// Checks if the item name is valid.
@@ -80,7 +89,11 @@ impl Catalog {
     ///
     /// `true` if the name is 3-20 characters long and contains only letters, otherwise `false`.
     fn is_valid_item_name(item_name: &str) -> bool {
-        let re = Regex::new(r"^[\p{L} ]{3,20}$").unwrap();
+        let re = Regex::new(&format!(
+            r"^[\p{{L}} ]{{{},{}}}$",
+            MIN_ITEM_NAME_LENGTH, MAX_ITEM_NAME_LENGTH
+        ))
+        .unwrap();
         re.is_match(item_name)
     }
 
