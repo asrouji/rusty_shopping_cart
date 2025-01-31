@@ -92,6 +92,7 @@ fn test_add_item_not_found() {
 
 #[test]
 fn test_add_item_zero_quantity() {
+    // note: negative numbers are already prevented by using unsigned integers
     let mut cart = ShoppingCart::new("abc12345de-A").unwrap();
     let result = cart.add_item("Laptop", 0);
     assert!(result.is_err());
