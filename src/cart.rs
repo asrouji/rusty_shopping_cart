@@ -4,7 +4,7 @@ use regex::Regex;
 use std::collections::HashMap;
 use uuid::Uuid;
 
-/// The maximum number of any given item that can be added to the shopping cart.
+const MIN_ITEM_COUNT: u32 = 1;
 const MAX_ITEM_COUNT: u32 = 100;
 
 /// Represents a shopping cart with a unique ID, customer ID, items, and a catalog.
@@ -80,7 +80,10 @@ impl ShoppingCart {
     /// Returns an error if the quantity is zero, the item is not found in the catalog,
     /// or the quantity exceeds the maximum limit.
     pub fn add_item(&mut self, name: &str, quantity: u32) -> Result<(), String> {
-        ensure!(quantity > 0, "Quantity must be nonzero".into());
+        ensure!(
+            quantity >= MIN_ITEM_COUNT,
+            "Quantity must be nonzero".into()
+        );
         ensure!(
             self.catalog.has_item(name),
             format!("Item not found in the catalog: {}", name)
@@ -106,11 +109,14 @@ impl ShoppingCart {
     /// Returns an error if the item is not found in the cart or the quantity is out of range.
     pub fn update_item(&mut self, name: &str, quantity: u32) -> Result<(), String> {
         match self.items.get_mut(name) {
-            Some(counter) if (1..=MAX_ITEM_COUNT).contains(&quantity) => {
+            Some(counter) if (MIN_ITEM_COUNT..=MAX_ITEM_COUNT).contains(&quantity) => {
                 *counter = quantity;
                 Ok(())
             }
-            Some(_) => Err(format!("Quantity must be between 1 and {}", MAX_ITEM_COUNT)),
+            Some(_) => Err(format!(
+                "Quantity must be between {} and {}",
+                MIN_ITEM_COUNT, MAX_ITEM_COUNT
+            )),
             None => Err(format!("Item not found in the cart: {}", name)),
         }
     }
