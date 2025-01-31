@@ -1,4 +1,5 @@
 use crate::catalog::Catalog;
+use crate::ensure; // Import the ensure macro
 use regex::Regex;
 use std::collections::HashMap;
 use uuid::Uuid;
@@ -26,9 +27,10 @@ impl ShoppingCart {
     ///
     /// Returns an error if the customer ID format is invalid.
     pub fn new(customer_id: &str) -> Result<Self, &'static str> {
-        if !Self::is_valid_customer_id(customer_id) {
-            return Err("Invalid customer ID format");
-        }
+        ensure!(
+            Self::is_valid_customer_id(customer_id),
+            "Invalid customer ID format"
+        );
         Ok(Self {
             id: Uuid::new_v4(),
             customer_id: customer_id.to_string(),
@@ -78,16 +80,16 @@ impl ShoppingCart {
     /// Returns an error if the quantity is zero, the item is not found in the catalog,
     /// or the quantity exceeds the maximum limit.
     pub fn add_item(&mut self, name: &str, quantity: u32) -> Result<(), String> {
-        if quantity == 0 {
-            return Err("Quantity must be nonzero".into());
-        }
-        if !self.catalog.has_item(name) {
-            return Err(format!("Item not found in the catalog: {}", name));
-        }
+        ensure!(quantity > 0, "Quantity must be nonzero".into());
+        ensure!(
+            self.catalog.has_item(name),
+            format!("Item not found in the catalog: {}", name)
+        );
         let counter = self.items.entry(name.to_string()).or_insert(0);
-        if *counter + quantity > MAX_ITEM_COUNT {
-            return Err(format!("Quantity exceeds the limit of {}", MAX_ITEM_COUNT));
-        }
+        ensure!(
+            *counter + quantity <= MAX_ITEM_COUNT,
+            format!("Quantity exceeds the limit of {}", MAX_ITEM_COUNT)
+        );
         *counter += quantity;
         Ok(())
     }

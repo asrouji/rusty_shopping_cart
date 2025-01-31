@@ -1,3 +1,4 @@
+use crate::ensure;
 use regex::Regex;
 use std::collections::HashMap;
 
@@ -50,18 +51,20 @@ impl Catalog {
     /// * `Ok(())` if the item was added successfully.
     /// * `Err(String)` if the item name or price is invalid.
     fn add_item(&mut self, item_name: &str, price: f64) -> Result<(), String> {
-        if !Self::is_valid_item_name(item_name) {
-            return Err(format!(
+        ensure!(
+            Self::is_valid_item_name(item_name),
+            format!(
                 "Invalid item name: must be {}-{} characters long and contain only letters",
                 MIN_ITEM_NAME_LENGTH, MAX_ITEM_NAME_LENGTH
-            ));
-        }
-        if !Self::is_valid_item_price(price) {
-            return Err(format!(
+            )
+        );
+        ensure!(
+            Self::is_valid_item_price(price),
+            format!(
                 "Invalid price: must be more than ${} and less than ${}",
                 MIN_ITEM_PRICE, MAX_ITEM_PRICE
-            ));
-        }
+            )
+        );
         self.items.insert(item_name.to_string(), price);
         Ok(())
     }
