@@ -112,7 +112,7 @@ fn test_update_item_not_found() {
 
     let result = cart.update_item("Tablet", 1);
     assert!(result.is_err());
-    assert_eq!(result.unwrap_err(), "Item not found in the cart: Tablet");
+    assert_eq!(result.unwrap_err(), "Item not found in the cart");
 }
 
 #[test]
@@ -121,7 +121,7 @@ fn test_update_item_zero_quantity() {
     cart.add_item("Laptop", 1).unwrap();
     let result = cart.update_item("Laptop", 0);
     assert!(result.is_err());
-    assert_eq!(result.unwrap_err(), "Quantity must be nonzero");
+    assert_eq!(result.unwrap_err(), "Quantity must be between 1 and 100");
 }
 
 #[test]
@@ -130,10 +130,7 @@ fn test_update_item_exceeds_limit() {
     cart.add_item("Laptop", 50).unwrap();
     let result = cart.update_item("Laptop", 101);
     assert!(result.is_err());
-    assert_eq!(
-        result.unwrap_err(),
-        "Quantity exceeds the maximum limit of 100"
-    );
+    assert_eq!(result.unwrap_err(), "Quantity must be between 1 and 100");
 }
 
 #[test]
@@ -172,7 +169,7 @@ fn test_remove_item_not_found() {
 
     let result = cart.remove_item("Tablet");
     assert!(result.is_err());
-    assert_eq!(result.unwrap_err(), "Item not found in the cart: Tablet");
+    assert_eq!(result.unwrap_err(), "Item not found in the cart");
 }
 
 #[test]

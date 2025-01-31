@@ -12,14 +12,14 @@ pub struct ShoppingCart {
 }
 
 impl ShoppingCart {
-    pub fn new(customer_id: &str) -> Result<Self, String> {
+    pub fn new(customer_id: &str) -> Result<Self, &'static str> {
         if !Self::is_valid_customer_id(customer_id) {
-            return Err("Invalid customer ID format".to_string());
+            return Err("Invalid customer ID format");
         }
         Ok(Self {
             id: Uuid::new_v4(),
             customer_id: customer_id.to_string(),
-            items: HashMap::new(),
+            items: HashMap::default(),
             catalog: Catalog::new(),
         })
     }
@@ -43,52 +43,46 @@ impl ShoppingCart {
 
     pub fn add_item(&mut self, name: &str, quantity: u32) -> Result<(), String> {
         if quantity == 0 {
-            return Err("Quantity must be nonzero".to_string());
+            return Err("Quantity must be nonzero".into());
         }
-        if let Some(&current_quantity) = self.items.get(name) {
-            if current_quantity + quantity > 100 {
-                return Err("Quantity exceeds the maximum limit of 100".to_string());
+        if !self.catalog.has_item(name) {
+            return Err(format!("Item not found in the catalog: {}", name));
+        }
+        let counter = self.items.entry(name.to_string()).or_insert(0);
+        if *counter + quantity > 100 {
+            return Err("Quantity exceeds the maximum limit of 100".into());
+        }
+        *counter += quantity;
+        Ok(())
+    }
+
+    pub fn update_item(&mut self, name: &str, quantity: u32) -> Result<(), &'static str> {
+        match self.items.get_mut(name) {
+            Some(counter) if (1..=100).contains(&quantity) => {
+                *counter = quantity;
+                Ok(())
             }
-        }
-        if self.catalog.has_item(name) {
-            let counter = self.items.entry(name.to_string()).or_insert(0);
-            *counter += quantity;
-            Ok(())
-        } else {
-            Err(format!("Item not found in the catalog: {}", name))
+            Some(_) => Err("Quantity must be between 1 and 100"),
+            None => Err("Item not found in the cart"),
         }
     }
 
-    pub fn update_item(&mut self, name: &str, quantity: u32) -> Result<(), String> {
-        if quantity == 0 {
-            return Err("Quantity must be nonzero".to_string());
-        }
-        if quantity > 100 {
-            return Err("Quantity exceeds the maximum limit of 100".to_string());
-        }
-        if let Some(counter) = self.items.get_mut(name) {
-            *counter = quantity;
-            Ok(())
-        } else {
-            Err(format!("Item not found in the cart: {}", name))
-        }
-    }
-
-    pub fn remove_item(&mut self, name: &str) -> Result<(), String> {
+    pub fn remove_item(&mut self, name: &str) -> Result<(), &'static str> {
         if self.items.remove(name).is_some() {
             Ok(())
         } else {
-            Err(format!("Item not found in the cart: {}", name))
+            Err("Item not found in the cart")
         }
     }
 
     pub fn get_total_cost(&self) -> f64 {
-        self.items.iter().fold(0.0, |total, (name, &quantity)| {
-            if let Some(price) = self.catalog.get_price(name) {
-                total + price * quantity as f64
-            } else {
-                total
-            }
-        })
+        self.items
+            .iter()
+            .filter_map(|(name, &quantity)| {
+                self.catalog
+                    .get_price(name)
+                    .map(|price| price * quantity as f64)
+            })
+            .sum()
     }
 }
