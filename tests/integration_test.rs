@@ -66,8 +66,16 @@ fn test_add_item_zero_quantity() {
 #[test]
 fn test_add_item_exceeds_limit() {
     let mut cart = ShoppingCart::new("abc12345de-A").unwrap();
+
     cart.add_item("Laptop", 50).unwrap();
     let result = cart.add_item("Laptop", 51);
+    assert!(result.is_err());
+    assert_eq!(
+        result.unwrap_err(),
+        "Quantity exceeds the maximum limit of 100"
+    );
+
+    let result = cart.add_item("Laptop", 101);
     assert!(result.is_err());
     assert_eq!(
         result.unwrap_err(),
