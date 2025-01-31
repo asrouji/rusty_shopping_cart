@@ -96,21 +96,32 @@ fn test_add_item_zero_quantity() {
     let mut cart = ShoppingCart::new("abc12345de-A").unwrap();
     let result = cart.add_item("Laptop", 0);
     assert!(result.is_err());
-    assert_eq!(result.unwrap_err(), "Quantity must be nonzero");
+    assert_eq!(
+        result.unwrap_err(),
+        "Quantity for item 'Laptop' must be between 1 and 100"
+    );
 }
 
 #[test]
 fn test_add_item_exceeds_limit() {
     let mut cart = ShoppingCart::new("abc12345de-A").unwrap();
 
+    // trying to add 101 laptops at once
+    let result = cart.add_item("Laptop", 101);
+    assert!(result.is_err());
+    assert_eq!(
+        result.unwrap_err(),
+        "Quantity for item 'Laptop' must be between 1 and 100"
+    );
+
+    // trying to add 51 laptops to a cart that already has 50
     cart.add_item("Laptop", 50).unwrap();
     let result = cart.add_item("Laptop", 51);
     assert!(result.is_err());
-    assert_eq!(result.unwrap_err(), "Quantity exceeds the limit of 100");
-
-    let result = cart.add_item("Laptop", 101);
-    assert!(result.is_err());
-    assert_eq!(result.unwrap_err(), "Quantity exceeds the limit of 100");
+    assert_eq!(
+        result.unwrap_err(),
+        "Adding 51 of 'Laptop' exceeds the limit of 100"
+    );
 }
 
 #[test]

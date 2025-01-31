@@ -81,8 +81,11 @@ impl ShoppingCart {
     /// or the quantity exceeds the maximum limit.
     pub fn add_item(&mut self, name: &str, quantity: u32) -> Result<(), String> {
         ensure!(
-            quantity >= MIN_ITEM_COUNT,
-            "Quantity must be nonzero".into()
+            (MIN_ITEM_COUNT..=MAX_ITEM_COUNT).contains(&quantity),
+            format!(
+                "Quantity for item '{}' must be between {} and {}",
+                name, MIN_ITEM_COUNT, MAX_ITEM_COUNT
+            )
         );
         ensure!(
             self.catalog.has_item(name),
@@ -91,7 +94,10 @@ impl ShoppingCart {
         let counter = self.items.entry(name.to_string()).or_insert(0);
         ensure!(
             *counter + quantity <= MAX_ITEM_COUNT,
-            format!("Quantity exceeds the limit of {}", MAX_ITEM_COUNT)
+            format!(
+                "Adding {} of '{}' exceeds the limit of {}",
+                quantity, name, MAX_ITEM_COUNT
+            )
         );
         *counter += quantity;
         Ok(())
