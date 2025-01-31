@@ -1,12 +1,18 @@
 use regex::Regex;
 use std::collections::HashMap;
 
+/// A catalog of items with their prices.
 #[derive(Debug)]
 pub struct Catalog {
     items: HashMap<String, f64>,
 }
 
 impl Catalog {
+    /// Creates a new catalog with default items.
+    ///
+    /// # Returns
+    ///
+    /// A `Catalog` instance with default items.
     pub fn new() -> Self {
         let mut catalog = Self {
             items: HashMap::new(),
@@ -27,7 +33,18 @@ impl Catalog {
         catalog
     }
 
-    pub fn add_item(&mut self, item_name: &str, price: f64) -> Result<(), String> {
+    /// Adds an item to the catalog.
+    ///
+    /// # Arguments
+    ///
+    /// * `item_name` - The name of the item to add.
+    /// * `price` - The price of the item.
+    ///
+    /// # Returns
+    ///
+    /// * `Ok(())` if the item was added successfully.
+    /// * `Err(String)` if the item name or price is invalid.
+    fn add_item(&mut self, item_name: &str, price: f64) -> Result<(), String> {
         if !Self::is_valid_item_name(item_name) {
             return Err(
                 "Invalid item name: must be 3-20 characters long and contain only letters".into(),
@@ -40,19 +57,55 @@ impl Catalog {
         Ok(())
     }
 
+    /// Checks if the item price is valid.
+    ///
+    /// # Arguments
+    ///
+    /// * `price` - The price to check.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the price is between $1 and $10,000, otherwise `false`.
     fn is_valid_item_price(price: f64) -> bool {
         (1.0..10000.0).contains(&price)
     }
 
+    /// Checks if the item name is valid.
+    ///
+    /// # Arguments
+    ///
+    /// * `item_name` - The name to check.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the name is 3-20 characters long and contains only letters, otherwise `false`.
     fn is_valid_item_name(item_name: &str) -> bool {
         let re = Regex::new(r"^[\p{L} ]{3,20}$").unwrap();
         re.is_match(item_name)
     }
 
+    /// Checks if the catalog contains an item.
+    ///
+    /// # Arguments
+    ///
+    /// * `item_name` - The name of the item to check.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the item is in the catalog, otherwise `false`.
     pub fn has_item(&self, item_name: &str) -> bool {
         self.items.contains_key(item_name)
     }
 
+    /// Gets the price of an item.
+    ///
+    /// # Arguments
+    ///
+    /// * `item_name` - The name of the item.
+    ///
+    /// # Returns
+    ///
+    /// `Some(f64)` with the price if the item is found, otherwise `None`.
     pub fn get_price(&self, item_name: &str) -> Option<f64> {
         self.items.get(item_name).copied()
     }
