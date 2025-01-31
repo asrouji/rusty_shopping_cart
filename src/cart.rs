@@ -86,7 +86,7 @@ impl ShoppingCart {
         );
         ensure!(
             self.catalog.has_item(name),
-            format!("Item not found in the catalog: {}", name)
+            format!("Item not found in the catalog: '{}'", name)
         );
         let counter = self.items.entry(name.to_string()).or_insert(0);
         ensure!(
@@ -117,7 +117,7 @@ impl ShoppingCart {
                 "Quantity must be between {} and {}",
                 MIN_ITEM_COUNT, MAX_ITEM_COUNT
             )),
-            None => Err(format!("Item not found in the cart: {}", name)),
+            None => Err(format!("Item not found in the cart: '{}'", name)),
         }
     }
 
@@ -130,11 +130,11 @@ impl ShoppingCart {
     /// # Errors
     ///
     /// Returns an error if the item is not found in the cart.
-    pub fn remove_item(&mut self, name: &str) -> Result<(), &'static str> {
+    pub fn remove_item(&mut self, name: &str) -> Result<(), String> {
         if self.items.remove(name).is_some() {
             Ok(())
         } else {
-            Err("Item not found in the cart")
+            Err(format!("Item not found in the cart: '{}'", name))
         }
     }
 

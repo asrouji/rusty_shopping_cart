@@ -54,15 +54,15 @@ impl Catalog {
         ensure!(
             Self::is_valid_item_name(item_name),
             format!(
-                "Invalid item name: must be {}-{} characters long and contain only letters",
-                MIN_ITEM_NAME_LENGTH, MAX_ITEM_NAME_LENGTH
+                "Invalid item name '{}': must be {}-{} characters long and contain only letters",
+                item_name, MIN_ITEM_NAME_LENGTH, MAX_ITEM_NAME_LENGTH
             )
         );
         ensure!(
             Self::is_valid_item_price(price),
             format!(
-                "Invalid price: must be more than ${} and less than ${}",
-                MIN_ITEM_PRICE, MAX_ITEM_PRICE
+                "Invalid price ${:.2} for item {}: must be between ${:.2} and ${:.2}",
+                price, item_name, MIN_ITEM_PRICE, MAX_ITEM_PRICE
             )
         );
         self.items.insert(item_name.to_string(), price);
@@ -161,17 +161,37 @@ mod tests {
     #[test]
     fn test_add_invalid_item_name() {
         let mut catalog = Catalog::new();
-        assert!(catalog.add_item("T", 999.99).is_err());
-        assert!(catalog
-            .add_item("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 999.99)
-            .is_err());
+        let result = catalog.add_item("T", 999.99);
+        assert!(result.is_err());
+        assert_eq!(
+            result.unwrap_err(),
+            "Invalid item name 'T': must be 3-20 characters long and contain only letters"
+        );
+
+        let result = catalog.add_item("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 999.99);
+        assert!(result.is_err());
+        assert_eq!(
+            result.unwrap_err(),
+            "Invalid item name 'ABCDEFGHIJKLMNOPQRSTUVWXYZ': must be 3-20 characters long and contain only letters"
+        );
     }
 
     #[test]
     fn test_add_invalid_item_price() {
         let mut catalog = Catalog::new();
-        assert!(catalog.add_item("Laptop", 0.0).is_err());
-        assert!(catalog.add_item("Laptop", 15000.0).is_err());
+        let result = catalog.add_item("Laptop", 0.0);
+        assert!(result.is_err());
+        assert_eq!(
+            result.unwrap_err(),
+            "Invalid price $0.00 for item Laptop: must be between $1.00 and $10000.00"
+        );
+
+        let result = catalog.add_item("Laptop", 15000.0);
+        assert!(result.is_err());
+        assert_eq!(
+            result.unwrap_err(),
+            "Invalid price $15000.00 for item Laptop: must be between $1.00 and $10000.00"
+        );
     }
 
     #[test]

@@ -84,7 +84,10 @@ fn test_add_item_not_found() {
 
     let result = cart.add_item("Tablet", 1);
     assert!(result.is_err());
-    assert_eq!(result.unwrap_err(), "Item not found in the catalog: Tablet");
+    assert_eq!(
+        result.unwrap_err(),
+        "Item not found in the catalog: 'Tablet'"
+    );
 }
 
 #[test]
@@ -146,7 +149,7 @@ fn test_update_item_not_found() {
 
     let result = cart.update_item("Tablet", 1);
     assert!(result.is_err());
-    assert_eq!(result.unwrap_err(), "Item not found in the cart: Tablet");
+    assert_eq!(result.unwrap_err(), "Item not found in the cart: 'Tablet'");
 }
 
 #[test]
@@ -203,7 +206,7 @@ fn test_remove_item_not_found() {
 
     let result = cart.remove_item("Tablet");
     assert!(result.is_err());
-    assert_eq!(result.unwrap_err(), "Item not found in the cart");
+    assert_eq!(result.unwrap_err(), "Item not found in the cart: 'Tablet'");
 }
 
 #[test]
