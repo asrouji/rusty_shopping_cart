@@ -102,17 +102,11 @@ fn test_add_item_exceeds_limit() {
     cart.add_item("Laptop", 50).unwrap();
     let result = cart.add_item("Laptop", 51);
     assert!(result.is_err());
-    assert_eq!(
-        result.unwrap_err(),
-        "Quantity exceeds the maximum limit of 100"
-    );
+    assert_eq!(result.unwrap_err(), "Quantity exceeds the limit of 100");
 
     let result = cart.add_item("Laptop", 101);
     assert!(result.is_err());
-    assert_eq!(
-        result.unwrap_err(),
-        "Quantity exceeds the maximum limit of 100"
-    );
+    assert_eq!(result.unwrap_err(), "Quantity exceeds the limit of 100");
 }
 
 #[test]
@@ -152,7 +146,7 @@ fn test_update_item_not_found() {
 
     let result = cart.update_item("Tablet", 1);
     assert!(result.is_err());
-    assert_eq!(result.unwrap_err(), "Item not found in the cart");
+    assert_eq!(result.unwrap_err(), "Item not found in the cart: Tablet");
 }
 
 #[test]

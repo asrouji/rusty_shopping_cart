@@ -86,7 +86,7 @@ impl ShoppingCart {
         }
         let counter = self.items.entry(name.to_string()).or_insert(0);
         if *counter + quantity > MAX_ITEM_COUNT {
-            return Err("Quantity exceeds the maximum limit of 100".into());
+            return Err(format!("Quantity exceeds the limit of {}", MAX_ITEM_COUNT));
         }
         *counter += quantity;
         Ok(())
@@ -102,14 +102,14 @@ impl ShoppingCart {
     /// # Errors
     ///
     /// Returns an error if the item is not found in the cart or the quantity is out of range.
-    pub fn update_item(&mut self, name: &str, quantity: u32) -> Result<(), &'static str> {
+    pub fn update_item(&mut self, name: &str, quantity: u32) -> Result<(), String> {
         match self.items.get_mut(name) {
             Some(counter) if (1..=MAX_ITEM_COUNT).contains(&quantity) => {
                 *counter = quantity;
                 Ok(())
             }
-            Some(_) => Err("Quantity must be between 1 and 100"),
-            None => Err("Item not found in the cart"),
+            Some(_) => Err(format!("Quantity must be between 1 and {}", MAX_ITEM_COUNT)),
+            None => Err(format!("Item not found in the cart: {}", name)),
         }
     }
 
